@@ -46,6 +46,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -70,20 +71,20 @@ import org.openide.util.Utilities;
  * Made public to allow ide/projectimport to reuse it
  */
 public final class NewJ2SEPlatform extends J2SEPlatformImpl implements Runnable {
-    
+
     private static final Logger LOGGER = Logger.getLogger(NewJ2SEPlatform.class.getName());
-    
+
     private static Set<String> propertiesToFix = new HashSet<String> ();
-    
+
     //Properties used by IDE which should be fixed not to use resolved symlink
     static {
         propertiesToFix.add ("scala.boot.class.path");    //NOI18N
         propertiesToFix.add ("scala.boot.library.path");  //NOI18N
         propertiesToFix.add ("scala.library.path");      //NOI18N
         propertiesToFix.add ("scala.ext.dirs");          //NOI18N
-        propertiesToFix.add ("scala.home");              //NOI18N       
+        propertiesToFix.add ("scala.home");              //NOI18N
     }
-    
+
     private boolean valid;
 
     public static NewJ2SEPlatform create (FileObject installFolder) throws IOException {
@@ -122,7 +123,7 @@ public final class NewJ2SEPlatform extends J2SEPlatformImpl implements Runnable 
             Map<String,String> m = new HashMap<String,String>(p.size());
             for (Enumeration en = p.keys(); en.hasMoreElements(); ) {
                 String k = (String)en.nextElement();
-                String v = p.getProperty(k);                
+                String v = p.getProperty(k);
                 if (J2SEPlatformImpl.SYSPROP_SCALA_CLASS_PATH.equals(k)) {
                     v = filterProbe (v, probePath);
                 }
@@ -131,7 +132,7 @@ public final class NewJ2SEPlatform extends J2SEPlatformImpl implements Runnable 
                 }
                 v = fixSymLinks (k,v);
                 m.put(k, v);
-            }   
+            }
             this.setSystemProperties(m);
             this.valid = true;
             is.close();
@@ -141,8 +142,8 @@ public final class NewJ2SEPlatform extends J2SEPlatformImpl implements Runnable 
             this.valid = false;
         }
     }
-    
-    
+
+
     /**
      * Fixes sun.boot.class.path property if it contains resolved
      * symbolic link. On Suse the jdk is symlinked and during update
@@ -175,7 +176,7 @@ public final class NewJ2SEPlatform extends J2SEPlatformImpl implements Runnable 
                         if (i > 0) {
                             sb.append(File.pathSeparatorChar);
                         }
-                        sb.append(pathElements[i]);                
+                        sb.append(pathElements[i]);
                     }
                     return sb.toString();
                 }
@@ -190,11 +191,15 @@ public final class NewJ2SEPlatform extends J2SEPlatformImpl implements Runnable 
     private String getSDKProperties(String scalaPath, String path) throws IOException {
 
         Runtime runtime = Runtime.getRuntime();
+
+        File probe = InstalledFileLocator.getDefault().locate("modules/ext/org-netbeans-modules-scala-stdplatform-probe.jar", "org.netbeans.modules.scala.stdplatform", false); // NOI18N
+        if (probe == null) throw new IOException("File org-netbeans-modules-scala-stdplatform-probe.jar could not be located, should not happen.");
+
         try {
             String[] command = new String[5];
             command[0] = scalaPath;
             command[1] = "-classpath";    //NOI18N
-            command[2] = InstalledFileLocator.getDefault().locate("modules/ext/org-netbeans-modules-scala-stdplatform-probe.jar", "org.netbeans.modules.scala.stdplatform", false).getAbsolutePath(); // NOI18N
+            command[2] = probe.getAbsolutePath();
             command[3] = "org.netbeans.modules.scala.stdplatform.wizard.SDKProbe";
             command[4] = path;
             if (LOGGER.isLoggable(Level.FINE)) {
@@ -205,8 +210,7 @@ public final class NewJ2SEPlatform extends J2SEPlatformImpl implements Runnable 
             // it produces a cancellable task.
             process.waitFor();
             int exitValue = process.exitValue();
-            if (exitValue != 0)
-                throw new IOException();
+            if (exitValue != 0) throw new IOException("The probe processes failed, please try the following command by hand: " + Arrays.toString(command));
             return command[2];
         } catch (InterruptedException ex) {
             IOException e = new IOException();

@@ -51,6 +51,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.event.ChangeEvent;
@@ -58,20 +59,16 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
+
 import org.netbeans.api.java.classpath.ClassPath;
-import org.netbeans.api.scala.platform.ScalaPlatform;
-import org.netbeans.api.scala.platform.ScalaPlatformManager;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
+import org.netbeans.api.scala.platform.ScalaPlatform;
+import org.netbeans.api.scala.platform.ScalaPlatformManager;
 import org.netbeans.modules.scala.stdplatform.platformdefinition.J2SEPlatformImpl;
 import org.netbeans.spi.java.classpath.PathResourceImplementation;
 import org.netbeans.spi.java.classpath.support.ClassPathSupport;
 import org.netbeans.spi.project.support.ant.PropertyUtils;
-import org.openide.util.NbBundle;
-import org.openide.util.RequestProcessor;
-import org.openide.util.Task;
-import org.openide.util.TaskListener;
-import org.openide.util.HelpCtx;
 import org.openide.ErrorManager;
 import org.openide.WizardDescriptor;
 import org.openide.filesystems.FileObject;
@@ -79,6 +76,11 @@ import org.openide.filesystems.FileStateInvalidException;
 import org.openide.filesystems.FileUtil;
 import org.openide.filesystems.URLMapper;
 import org.openide.util.ChangeSupport;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
+import org.openide.util.RequestProcessor;
+import org.openide.util.Task;
+import org.openide.util.TaskListener;
 
 /**
  * This Panel launches autoconfiguration during the New J2SE Platform sequence.
@@ -112,8 +114,8 @@ public class DetectPanel extends javax.swing.JPanel {
     }
 
     public void addNotify() {
-        super.addNotify();        
-    }    
+        super.addNotify();
+    }
 
     private void postInitComponents () {
         this.jdkName.getDocument().addDocumentListener (new DocumentListener () {
@@ -129,7 +131,7 @@ public class DetectPanel extends javax.swing.JPanel {
             public void changedUpdate(DocumentEvent e) {
                 handleNameChange ();
             }
-        });                
+        });
         this.progressLabel.setVisible(false);
         this.progressPanel.setVisible(false);
     }
@@ -292,7 +294,7 @@ public class DetectPanel extends javax.swing.JPanel {
         if (newValue != null) {
             this.javadoc.setText(newValue);
         }
-        
+
     }//GEN-LAST:event_selectJavadoc
 
     private void selectSources(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectSources
@@ -301,7 +303,7 @@ public class DetectPanel extends javax.swing.JPanel {
             this.sources.setText(newValue);
         }
     }//GEN-LAST:event_selectSources
-    
+
     public final synchronized void addChangeListener (ChangeListener listener) {
         cs.addChangeListener(listener);
     }
@@ -313,7 +315,7 @@ public class DetectPanel extends javax.swing.JPanel {
     public String getPlatformName() {
 	    return jdkName.getText();
     }
-    
+
     String getSources () {
         String val = this.sources.getText();
         return val.length() == 0 ? null : val;
@@ -345,16 +347,16 @@ public class DetectPanel extends javax.swing.JPanel {
     }
 
 
-    private static String getInitialName (Map<String,String> m) {        
+    private static String getInitialName (Map<String,String> m) {
         String scalaVersion = m.get("scala.version.number");        //NOI18N
-        StringBuilder result = new StringBuilder(NbBundle.getMessage(DetectPanel.class,"TXT_DetectPanel_Java"));        
+        StringBuilder result = new StringBuilder(NbBundle.getMessage(DetectPanel.class,"TXT_DetectPanel_Java"));
         if (scalaVersion != null) {
             result.append(" ").append(scalaVersion);
         }
         return result.toString();
     }
-    
-    
+
+
     private String browse (String oldValue, String title) {
         JFileChooser chooser = new JFileChooser ();
         FileUtil.preventFileChooserSymlinkTraversal(chooser, null);
@@ -407,7 +409,7 @@ public class DetectPanel extends javax.swing.JPanel {
         private WizardDescriptor    wiz;
         private ProgressHandle      progressHandle;
 
-        WizardPanel(J2SEWizardIterator iterator) {            
+        WizardPanel(J2SEWizardIterator iterator) {
 	    this.iterator = iterator;
         }
 
@@ -450,7 +452,7 @@ public class DetectPanel extends javax.swing.JPanel {
             return valid;
         }
 
-        public void readSettings(WizardDescriptor settings) {           
+        public void readSettings(WizardDescriptor settings) {
             this.wiz = settings;
             ScalaPlatform platform = this.iterator.getPlatform();
             String srcPath = null;
@@ -478,7 +480,7 @@ public class DetectPanel extends javax.swing.JPanel {
                             }
                         }
                     }
-                }                
+                }
             }
             List<URL> jdoc = platform.getJavadocFolders();
             if (jdoc.size()>0) {
@@ -495,7 +497,7 @@ public class DetectPanel extends javax.swing.JPanel {
                         File f = new File (base,"docs"); //NOI18N
                         if (f.isDirectory() && f.canRead()) {
                             jdocPath = f.getAbsolutePath();
-                        }                        
+                        }
                     }
                 }
                 firstPass = false;
@@ -505,7 +507,7 @@ public class DetectPanel extends javax.swing.JPanel {
             this.component.jdkName.setEditable(false);
             this.component.progressPanel.setVisible (true);
             this.component.progressLabel.setVisible (true);
-            
+
             this.progressHandle = ProgressHandleFactory.createHandle(NbBundle.getMessage(DetectPanel.class,"TXT_PlatfromDetectProgress"));
             this.component.progressPanel.removeAll();
             this.component.progressPanel.setLayout (new GridBagLayout ());
@@ -530,8 +532,8 @@ public class DetectPanel extends javax.swing.JPanel {
 	 has entered. Stores user-customized display name into the Platform.
 	 */
         public void storeSettings(WizardDescriptor settings) {
-            if (isValid()) {                                
-                String name = component.getPlatformName();                
+            if (isValid()) {
+                String name = component.getPlatformName();
                 List<PathResourceImplementation> src = new ArrayList<PathResourceImplementation>();
                 List<URL> jdoc = new ArrayList<URL>();
                 String srcPath = this.component.getSources();
@@ -576,13 +578,13 @@ public class DetectPanel extends javax.swing.JPanel {
                         ErrorManager.getDefault().notify (mue);
                     }
                 }
-                
+
                 NewJ2SEPlatform platform = this.iterator.getPlatform();
                 platform.setDisplayName (name);
                 platform.setAntName (createAntName (name));
                 platform.setSourceFolders (ClassPathSupport.createClassPath(src));
                 platform.setJavadocFolders (jdoc);
-                
+
                 platform = this.iterator.getSecondaryPlatform();
                 if (platform != null) {
                     name = NbBundle.getMessage(DetectPanel.class,"FMT_64BIT", name);
@@ -590,7 +592,7 @@ public class DetectPanel extends javax.swing.JPanel {
                     platform.setAntName (createAntName(name));
                     platform.setSourceFolders (ClassPathSupport.createClassPath(src));
                     platform.setJavadocFolders (jdoc);
-                }                                
+                }
             }
         }
 
@@ -605,11 +607,11 @@ public class DetectPanel extends javax.swing.JPanel {
                     assert progressHandle != null;
                     progressHandle.finish ();
                     component.progressPanel.setVisible (false);
-                    component.progressLabel.setVisible (false);                    
-                    detected = iterator.getPlatform().isValid();                    
+                    component.progressLabel.setVisible (false);
+                    detected = iterator.getPlatform().isValid();
                     checkValid ();
                 }
-            });            
+            });
         }
 
 
@@ -619,34 +621,34 @@ public class DetectPanel extends javax.swing.JPanel {
 
         private void checkValid () {
             this.wiz.putProperty( "WizardPanel_errorMessage", ""); //NOI18N
-            String name = this.component.getPlatformName ();            
-            boolean validDisplayName = name.length() > 0;            
-            boolean usedDisplayName = false;            
+            String name = this.component.getPlatformName ();
+            boolean validDisplayName = name.length() > 0;
+            boolean usedDisplayName = false;
             if (!detected) {
                 this.wiz.putProperty( "WizardPanel_errorMessage",NbBundle.getMessage(DetectPanel.class,"ERROR_NoSDKRegistry"));         //NOI18N
             }
             else if (!validDisplayName) {
                 this.wiz.putProperty( "WizardPanel_errorMessage",NbBundle.getMessage(DetectPanel.class,"ERROR_InvalidDisplayName"));    //NOI18N
             }
-            else {                
-                ScalaPlatform[] platforms = ScalaPlatformManager.getDefault().getInstalledPlatforms();                
+            else {
+                ScalaPlatform[] platforms = ScalaPlatformManager.getDefault().getInstalledPlatforms();
                 for (int i=0; i<platforms.length; i++) {
                     if (name.equals (platforms[i].getDisplayName())) {
                         usedDisplayName = true;
                         this.wiz.putProperty( "WizardPanel_errorMessage",NbBundle.getMessage(DetectPanel.class,"ERROR_UsedDisplayName"));    //NOI18N
                         break;
                     }
-                }                
+                }
             }
             boolean v = detected && validDisplayName && !usedDisplayName;
-            setValid(v);            
+            setValid(v);
         }
 
         private static String createAntName (String name) {
             if (name == null || name.length() == 0) {
                 throw new IllegalArgumentException ();
-            }                        
-            String antName = PropertyUtils.getUsablePropertyName(name);            
+            }
+            String antName = PropertyUtils.getUsablePropertyName(name);
             if (platformExists (antName)) {
                 String baseName = antName;
                 int index = 1;
@@ -658,7 +660,7 @@ public class DetectPanel extends javax.swing.JPanel {
             }
             return antName;
         }
-        
+
         private static boolean platformExists (String antName) {
             ScalaPlatformManager mgr = ScalaPlatformManager.getDefault();
             ScalaPlatform[] platforms = mgr.getInstalledPlatforms();
@@ -672,6 +674,6 @@ public class DetectPanel extends javax.swing.JPanel {
             }
             return false;
         }
-        
-    }    
+
+    }
 }
