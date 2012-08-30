@@ -3,7 +3,8 @@ package org.netbeans.modules.scala.app;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.logging.Level;
-import junit.framework.Test;
+
+import org.netbeans.jellytools.JellyTestCase;
 import org.netbeans.jellytools.NbDialogOperator;
 import org.netbeans.jellytools.NewProjectWizardOperator;
 import org.netbeans.jellytools.ProjectsTabOperator;
@@ -13,10 +14,13 @@ import org.netbeans.jellytools.nodes.Node;
 import org.netbeans.jellytools.nodes.ProjectRootNode;
 import org.netbeans.jellytools.properties.editors.FileCustomEditorOperator;
 import org.netbeans.jemmy.operators.JButtonOperator;
+import org.netbeans.jemmy.operators.JLabelOperator;
 import org.netbeans.jemmy.operators.JTableOperator;
 import org.netbeans.jemmy.operators.JTextPaneOperator;
 import org.netbeans.junit.NbModuleSuite;
 import org.netbeans.junit.NbTestCase;
+
+import junit.framework.Test;
 
 public class ApplicationTest extends NbTestCase {
 
@@ -28,7 +32,7 @@ public class ApplicationTest extends NbTestCase {
                 gui(true).
                 clusters(".*").
                 failOnMessage(Level.SEVERE).
-// TODO: Can be enables if the java.lang.ClassCastException: org.netbeans.api.project.ProjectUtils$AnnotateIconProxyProjectInformation 
+// TODO: Can be enables if the java.lang.ClassCastException: org.netbeans.api.project.ProjectUtils$AnnotateIconProxyProjectInformation
 // cannot be cast to org.netbeans.modules.scala.project.J2SEProject$Info is solved
 //                failOnException(Level.INFO).
                 suite();
@@ -38,15 +42,35 @@ public class ApplicationTest extends NbTestCase {
         super(n);
     }
 
-    public void testApplication() {
+    /**
+     * Test if a ScalaPlatform is found.
+     */
+    public void testPlatformIsFound() {
+        String scalaHome = System.getenv("SCALA_HOME");
+        if (scalaHome == null || scalaHome.trim().equals("")) return; // No Scala Home is set, Shell will not work.
+        File scalaHomeDir = new File(scalaHome);
+        assertTrue("Environment Variable SCALA_HOME=" + scalaHome + " doesn't point to an existing directory",scalaHomeDir.exists());
+        assertTrue("Environment Variable SCALA_HOME=" + scalaHome + " doesn't point to a directory",scalaHomeDir.isDirectory());
+        // TODO: Find a way to test the Application without the Platform istalled.
+        // e.g., Put platform in Testdirectory. Set System Environment Variable. Start.
+        ActionNoBlock openScalaPlatforms = new ActionNoBlock("Tools|Scala Platforms", null);
+        openScalaPlatforms.performMenu();
+        NbDialogOperator scalaPlatforms = new NbDialogOperator("Scala Platform Manager");
+        JLabelOperator l = new JLabelOperator(scalaPlatforms, "Error");
+        System.out.println(l.getText());
+        System.out.println(l.isShowing());
+        scalaPlatforms.btClose();
+    }
+
+    public void ignoreTestApplication() {
         new ActionNoBlock("Help|About", null).performMenu();
         new NbDialogOperator("About").closeByButton();
     }
-    
+
     /**
      * Test if the ScalaShell is enabled and opens.
      */
-    public void testInteractiveScalaShell() {
+    public void ignoreTestInteractiveScalaShell() {
         String scalaHome = System.getenv("SCALA_HOME");
         if (scalaHome == null || scalaHome.trim().equals("")) return; // No Scala Home is set, Shell will not work.
         File scalaHomeDir = new File(scalaHome);
@@ -64,22 +88,21 @@ public class ApplicationTest extends NbTestCase {
         theConsole.waitComponentShowing(false);
         assertFalse("Scala Console still visible, should be closed",theConsole.isShowing());
     }
-    
-    public void testNewScalaProject() {
+
+    public void ignoreTestNewScalaProject() {
         NewProjectWizardOperator newProjectWizard = NewProjectWizardOperator.invoke();
         newProjectWizard.selectCategory("Scala");
         newProjectWizard.selectProject("Scala Application");
         newProjectWizard.next();
         newProjectWizard.finish();
-        
+
         // TODO: Cause of the missing JUnit dependencies, a resolve references Dialog is opening.
         // IDEA: Change the default Project to have no dependency to JUnit
         new NbDialogOperator("Open Project").btClose();
-        
+
         // TODO: Some asserts or an actuall compile to make sure the project is active and alive.
     }
-    
-    
+
     /**
      * A Test to see if a scala maven project is discovert and the scala sources
      * are displayed in the source node.
@@ -135,5 +158,5 @@ public class ApplicationTest extends NbTestCase {
         // At the moment this is not the case. A mixed scala-java project works, but displays erros in the ui.
         // assertTrue("No Error Runner.java in the Action Itmes found, but should be", row == -1);
     }
-    
+
 }
