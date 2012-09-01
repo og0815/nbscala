@@ -339,12 +339,16 @@ public final class J2SEProject implements Project, AntProjectListener {
 
     @Override
     public void configurationXmlChanged(AntProjectEvent ev) {
-        if (ev.getPath().equals(AntProjectHelper.PROJECT_XML_PATH)) {
-            // Could be various kinds of changes, but name & displayName might have changed.
-            Info info = (Info) ProjectUtils.getInformation(this);
-            info.firePropertyChange(ProjectInformation.PROP_NAME);
-            info.firePropertyChange(ProjectInformation.PROP_DISPLAY_NAME);
-        }
+        // Notes from oliver.guenther 2012-08
+        // First: Since 7.2 This results in a ClassCastException.
+        // Second: #110886 is fixed since 7.0 so this should be done completely different
+        // Third: I don't get, it. Why fire a change, then a fire should be happen automaticlly on change.
+        
+//        if (ev.getPath().equals(AntProjectHelper.PROJECT_XML_PATH)) {
+//            Info info = (Info) ProjectUtils.getInformation(this);
+//            info.firePropertyChange(ProjectInformation.PROP_NAME);
+//            info.firePropertyChange(ProjectInformation.PROP_DISPLAY_NAME);
+//        }
     }
 
     @Override
